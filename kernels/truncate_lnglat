@@ -1,0 +1,19 @@
+__kernel void truncate_lnglat_kernel(__global float *lng, __global float *lat, __global float *output) {
+    int gid = get_global_id(0);
+
+    float lng_value = lng[gid];
+    float lat_value = lat[gid];
+
+    if (lng_value > 180.0f)
+        lng_value = 180.0f;
+    else if (lng_value < -180.0f)
+        lng_value = -180.0f;
+
+    if (lat_value > 90.0f)
+        lat_value = 90.0f;
+    else if (lat_value < -90.0f)
+        lat_value = -90.0f;
+
+    output[gid * 2] = lng_value;
+    output[gid * 2 + 1] = lat_value;
+}

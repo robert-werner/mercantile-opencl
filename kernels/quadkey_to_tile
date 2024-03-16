@@ -1,0 +1,38 @@
+typedef struct {
+    int x;
+    int y;
+    int z;
+} Tile;
+
+__kernel void quadkey_to_tile(__global const char *quadkeys, __global Tile *tiles, int num_quadkeys) {
+    int gid = get_global_id(0);
+    if (gid < num_quadkeys) {
+        int offset = gid * 256;
+        int len = 0;
+        while (quadkeys[offset + len] != '\\0') {
+            len++;
+        }
+        if (len == 0) {
+            tiles[gid].x = 0;
+            tiles[gid].y = 0;
+            tiles[gid].z = 0;
+        } else {
+            int xtile = 0, ytile = 0;
+            for (int i = len - 1; i >= 0; i--) {
+                int mask = 1 << (len - 1 - i);
+                char digit = quadkeys[offset + i];
+                if (digit == '1') {
+                    xtile |= mask;
+                } else if (digit == '2') {
+                    ytile |= mask;
+                } else if (digit == '3') {
+                    xtile |= mask;
+                    ytile |= mask;
+                }
+            }
+            tiles[gid].x = xtile;
+            tiles[gid].y = ytile;
+            tiles[gid].z = len;
+        }
+    }
+}
